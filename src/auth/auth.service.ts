@@ -1,5 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { SignUpDto } from './dto/sign-up.dto';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
+import { SignUpDto } from './dto/requestDTO/signUp.dto';
 import { UsersService } from 'src/user/user.service';
 import { UtilService } from 'src/util/util.service';
 
@@ -16,17 +21,29 @@ export class AuthService {
       const userExist = await this.userService.getUserByEmail(email);
 
       if (userExist) {
-        
+        throw new ConflictException(`${email} already registered`);
       }
 
       const hash = await this.utilService.hashPassword(password);
-      
+
       const user = await this.userService.create({
         ...data,
         password: hash,
       });
 
-      return { user };
-    } catch (error) {}
+      const token = await this.utilService.generateToken(user.user.id);
+
+      return {
+        status: 201,
+        message: 'created successfully',
+        data: { user, token },
+      };
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+      console.log(error);
+      throw new HttpException('internal server error', HttpStatus.BAD_REQUEST, error);
+    }
   }
 }

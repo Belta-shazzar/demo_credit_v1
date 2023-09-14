@@ -1,34 +1,35 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-} from '@nestjs/common';
-import { Knex } from 'knex';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { InjectModel } from 'nest-knexjs';
-import { CreateUserDto } from './dto/create-user.dto';
+import { AccountService } from 'src/account/account.service';
+import { SignUpDto } from 'src/auth/dto/requestDTO/signUp.dto';
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel() private readonly knex: Knex) {}
+  constructor(
+    private readonly userRepo: UserRepository, 
+    private readonly accountService: AccountService,
+  ) {}
 
-  async create(createUserDto: CreateUserDto) {
+  async create(data: SignUpDto) {
     try {
-      const { fullName, email, password } = createUserDto;
-      const users = await this.knex
-        .table('user')
-        .insert({ id: uuidv4(), email, password, full_name: fullName });
+      const { fullName, email, password } = data;
+      const id = uuidv4();
+      
+      const user = await this.userRepo.create({ id, email, password, full_name: fullName });
 
-      return users;
-    } catch (err) {
-      console.log(err);
+      const account = await this.accountService.createAccount(user.id);
 
-      throw new HttpException(err, HttpStatus.BAD_REQUEST);
+      return { user, account };
+    } catch (error) {
+      console.log(error);
+
+      throw new HttpException('internal server error', HttpStatus.BAD_REQUEST, error);
     }
   }
 
   async getUserByEmail(email: string) {
-    const users = await this.knex.table('user').where('email', email);
-    return users[0];
+    const user = await this.userRepo.getUserByEmail(email);
+    return user;
   }
 }
