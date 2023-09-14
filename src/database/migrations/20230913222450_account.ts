@@ -8,6 +8,7 @@ export async function up(knex: Knex): Promise<void> {
     table
       .uuid('user_id')
       .unique()
+      .notNullable()
       .references('id')
       .inTable('user');
     table.string('account_number').notNullable().unique();

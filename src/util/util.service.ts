@@ -11,6 +11,10 @@ export class UtilService {
     return bcrypt.hash(password, 10);
   }
 
+  public async checkPassword(password: string, hash: string) {
+    return bcrypt.compare(password, hash);
+  }
+
   public async generateToken(userId: string) {
     const jwtPayload = {
       userId,
