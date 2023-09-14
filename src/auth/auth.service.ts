@@ -17,7 +17,7 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly utilService: UtilService,
-    private readonly util: Util
+    private readonly util: Util,
   ) {}
   async signUp(data: SignUpDto) {
     try {
@@ -43,7 +43,7 @@ export class AuthService {
       //   message: 'created successfully',
       //   data: { user, token },
       // };
-      return this.util.authResponse(201, user)
+      return this.util.authResponse(201, user);
     } catch (error) {
       if (error instanceof ConflictException) {
         throw error;
@@ -61,7 +61,7 @@ export class AuthService {
     try {
       const { email, password } = data;
 
-      const user = await this.userService.getUserByEmail(email);      
+      const user = await this.userService.getUserByEmail(email);
 
       if (!user) {
         throw new NotFoundException(`user with ${email} not found`);
@@ -78,7 +78,7 @@ export class AuthService {
 
       const account = await this.userService.getAccountByUserId(user.id);
 
-      const $user = { ...omit(user, 'password'), account }
+      const $user = { ...omit(user, ['password']), account };
 
       return this.util.authResponse(200, $user);
     } catch (error) {

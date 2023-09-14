@@ -17,7 +17,7 @@ export class UtilService {
 
   public async generateToken(userId: string) {
     const jwtPayload = {
-      userId,
+      sub: userId,
     };
     const options = { expiresIn: '6h' };
 

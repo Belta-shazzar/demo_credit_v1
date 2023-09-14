@@ -12,7 +12,7 @@ export async function up(knex: Knex): Promise<void> {
       .references('id')
       .inTable('user');
     table.string('account_number').notNullable().unique();
-    table.decimal('balance', 10, 2).notNullable().defaultTo(0.0);
+    table.float('balance').notNullable().defaultTo(0.0);
     table.string('currency').notNullable();
     table.timestamps(true, true);
   });
